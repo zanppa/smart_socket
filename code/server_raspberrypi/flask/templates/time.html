@@ -1,0 +1,287 @@
+<html>
+<head>
+<meta charset="UTF-8" />
+<style>
+body {
+	height: 100%;
+	background-image: linear-gradient(to bottom right, #99e6ff, #007acc);
+	font-size: 3vw;
+}
+
+h1 {
+	font-size: 4vw;
+}
+
+td {
+	text-align: center;
+}
+
+button {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 4vw;
+	color: #ffffff;
+	height: 7vw;
+	background: -moz-linear-gradient(
+		top,
+		#ffffff 0%,
+		#2b2b2b);
+	background: -webkit-gradient(
+		linear, left top, left bottom,
+		from(#ffffff),
+		to(#2b2b2b));
+	-moz-border-radius: 2vw;
+	-webkit-border-radius: 2vw;
+	border-radius: 2vw;
+	border: 1px solid #000000;
+	-moz-box-shadow:
+		0px 0.5vw 3vw rgba(000,000,000,0.5),
+		inset 0px 0px 4vw rgba(161,142,016,0.6);
+	-webkit-box-shadow:
+		0px 0.5vw 3vw rgba(000,000,000,0.5),
+		inset 0px 0px 4vw rgba(161,142,016,0.6);
+	box-shadow:
+		0px 0.5vw 3vw rgba(000,000,000,0.5),
+		inset 0px 0px 4vw rgba(161,142,016,0.6);
+	text-shadow:
+		0px -1px 3px rgba(33,33,33,0.8),
+		0px 1px 0px rgba(33,33,33,0.3);
+	transition: all 0.5s;
+}
+
+button span {
+	cursor: pointer;
+	display: inline-block;
+	position: relative;
+	transition: 0.5s;
+}
+
+button span:after {
+	content: '\00bb';
+	position: absolute;
+	opacity: 0;
+	top: 0;
+	right: -8vw;
+	transition: 0.5s;
+}
+
+button:hover span {
+	padding-right: 4vw;
+}
+
+button:hover span:after {
+	opacity: 1;
+	right: 0;
+}
+
+button:active {
+	box-shadow:
+		0px 1vw 5vw rgba(000,000,000,0.8),
+		inset 0px 0px 4vw rgba(161,142,016,0.8);
+}
+
+.loading {
+   width: 100%;
+   height: 100%;
+   top: 0;
+   left: 0;
+   position: fixed;
+   display: block;
+   opacity: 0.7;
+   background-color: #fff;
+   z-index: 99;
+   text-align: center;
+   vertical-align: middle;
+}
+
+</style>
+
+<script type="application/javascript">
+function programQuery(url, cFunction) {
+  document.getElementById("komento").innerHTML = "Päivittää...";
+
+  var palaute = document.getElementById("palaute");
+  palaute.innerHTML = "Päivittää..."
+
+  var lataus = document.getElementById("loading");
+  lataus.className = "loading";
+  lataus.innerHTML = "Ladataan tietoja...";
+
+  var startdate = document.getElementById("start_date").value;
+  var starttime = document.getElementById("start_time").value;
+  var stopdate = document.getElementById("stop_date").value;
+  var stoptime = document.getElementById("stop_time").value;
+
+  var params = "startdate=" + startdate + "&starttime=" + starttime;
+  params += "&stopdate=" + stopdate + "&stoptime=" + stoptime;
+
+  var xhttp = new XMLHttpRequest();
+  xhttp.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+      var jsonObj = JSON.parse(this.responseText);
+      cFunction(jsonObj);
+    }
+  };
+  xhttp.open("GET", url + "?" + params, true);
+  xhttp.send();
+}
+
+function updateQuery(url, cFunction) {
+  document.getElementById("komento").innerHTML = "Päivittää...";
+
+  var palaute = document.getElementById("palaute");
+  palaute.innerHTML = ""
+
+  var lataus = document.getElementById("loading");
+  lataus.className = "loading";
+  lataus.innerHTML = "Ladataan tietoja...";
+
+  var taulukko_paikka = document.getElementById("lista");
+  while (taulukko_paikka.hasChildNodes()) {	// Remove all previous data
+    taulukko_paikka.removeChild(taulukko_paikka.lastChild);
+  }
+
+  var xhttp = new XMLHttpRequest();
+  xhttp.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+      var jsonObj = JSON.parse(this.responseText);
+      cFunction(jsonObj);
+    }
+  };
+  xhttp.open("GET", url, true);
+  xhttp.send();
+}
+
+function statusQuery(url, cFunction) {
+  document.getElementById("komento").innerHTML = "Päivittää...";
+
+  var palaute = document.getElementById("palaute");
+  palaute.innerHTML = "Päivittää..."
+
+  var lataus = document.getElementById("loading");
+  lataus.className = "loading";
+  lataus.innerHTML = "Ladataan tietoja...";
+
+  var xhttp = new XMLHttpRequest();
+  xhttp.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+      var jsonObj = JSON.parse(this.responseText);
+      cFunction(jsonObj);
+    }
+  };
+  xhttp.open("GET", url, true);
+  xhttp.send();
+}
+
+function statusFunction(jsonObj) {
+  document.getElementById("komento").innerHTML =
+    jsonObj.comment;
+
+  var lataus = document.getElementById("loading");
+  lataus.className = "";
+  lataus.innerHTML = "";
+
+  if (jsonObj.status == 0) {
+    document.getElementById("palaute").innerHTML = "Epäonnistui";
+    return;
+  }
+
+  var palaute = document.getElementById("palaute");
+  var ts = new Date(jsonObj.time);
+  palaute.innerHTML = "Kellonaika: " + jsonObj.timestring;
+  palaute.innerHTML += "<br />";
+  palaute.innerHTML += "Aikaleima: " + jsonObj.time;
+  palaute.innerHTML += "<br />";
+  palaute.innerHTML += "Lämpötila: " + jsonObj.temperature;
+  palaute.innerHTML += "<br />";
+  palaute.innerHTML += "Rele1: " + jsonObj.relay1;
+  palaute.innerHTML += "<br />";
+  palaute.innerHTML += "Rele2: " + jsonObj.relay2;
+  palaute.innerHTML += "<br />";
+  palaute.innerHTML += "SNR: " + jsonObj.SNR;
+  palaute.innerHTML += "<br />";
+  palaute.innerHTML += "RSSI: " + jsonObj.RSSI;
+}
+
+function statusUpdateFunction(jsonObj) {
+  document.getElementById("komento").innerHTML =
+    jsonObj.comment;
+
+  var lataus = document.getElementById("loading");
+  lataus.className = "";
+  lataus.innerHTML = "";
+
+  if (jsonObj.status == 0) {
+    document.getElementById("palaute").innerHTML = "Epäonnistui";
+    return;
+  }
+
+  var taulukko_paikka = document.getElementById("lista");
+  while (taulukko_paikka.hasChildNodes()) {	// Remove all previous data
+    taulukko_paikka.removeChild(taulukko_paikka.lastChild);
+  }
+
+  var taulukko = document.createElement("table");
+  for (var i = 0; i < jsonObj.events.length; i++) {
+    var tr = document.createElement("tr");
+    tr.appendChild(document.createElement("td"));
+    tr.appendChild(document.createElement("td"));
+    tr.appendChild(document.createElement("td"));
+
+    var time = jsonObj.events[i].time;
+    var mode = jsonObj.events[i].mode;
+    var timestring = jsonObj.events[i].timestring;
+
+    var modestring = "Pois";
+    if(mode == 1) modestring = "Päälle";
+    if(time == 0) {
+      modestring = "Ei käytössä";
+      timestring = "";
+    }
+
+    tr.cells[0].appendChild(document.createTextNode("Muistipaikka " + (i+1)));
+    tr.cells[1].appendChild(document.createTextNode(modestring));
+    tr.cells[2].appendChild(document.createTextNode(timestring));
+
+    taulukko.appendChild(tr);
+  }
+
+  taulukko_paikka.appendChild(taulukko);
+
+  var palaute = document.getElementById("palaute");
+  palaute.innerHTML = ""
+}
+
+</script>
+
+<title>Lämmityspistorasian ohjaus - ajastus</title>
+</head>
+<body>
+<div id="loading" class=""></div>
+<center>
+<h1>Lämmityspistorasian ohjaus - ajastus</h1>
+<button id="button1" class="button" onClick="updateButton('/config/settime', statusFunction)"><span>Aseta aika</span></button>
+<button id="button3" class="button" onClick="statusQuery('/status', statusFunction)"><span>Päivitä tila</span></button>
+<br />
+<br />
+Päälle: <input type="date" id="start_date" /><input type="time" id="start_time"><br />
+Pois: <input type="date" id="stop_date" /><input type="time" id="stop_time"><br />
+<button id="button1" class="button" onClick="programQuery('/time/add', statusFunction)"><span>Lisää ajastus</span></button>
+<br />
+<br />
+<button id="button2" class="button" onClick="updateQuery('/time/update', statusUpdateFunction)"><span>Päivitä tiedot</span></button>
+<br />
+<br />
+<button id="button3" class="button" onClick="statusQuery('/time/clear', statusFunction)"><span>Tyhjennä ajastukset</span></button>
+<br />
+<a href="/">Pääsivulle</a>
+<br />
+<br />
+<div id="lista"></div>
+<br />
+<div id="komento"></div>
+<br />
+<div id="palaute"></div>
+</center>
+<!-- Button created with http://css3button.net -->
+</body>
+</html>
